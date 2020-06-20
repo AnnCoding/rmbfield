@@ -15,16 +15,13 @@ import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiAnnotationParameterList;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiModifierList;
 import com.intellij.psi.PsiNameValuePair;
 import com.intellij.ui.CollectionListModel;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author chenjiena
@@ -99,17 +96,8 @@ public class RmbSeq extends AnAction {
     private void addRmbField(PsiClass psiClass) {
         List<PsiField> fields = (new CollectionListModel(psiClass.getFields())).getItems();
         if (fields != null) {
-            List<PsiMethod> list = (new CollectionListModel(psiClass.getMethods())).getItems();
-            Set<String> methodSet = new HashSet();
-            Iterator var6 = list.iterator();
-
-            while (var6.hasNext()) {
-                PsiMethod m = (PsiMethod) var6.next();
-                methodSet.add(m.getName());
-            }
-
             int count = this.checkSuperFieldCount(psiClass);
-            count = Math.max(count, this.getMaxSeqMaxValue(list)) + 1;
+            count = Math.max(count, this.getMaxSeqMaxValue(fields)) + 1;
             Iterator var8 = fields.iterator();
 
             //遍历字段
@@ -123,7 +111,7 @@ public class RmbSeq extends AnAction {
         }
     }
 
-    private Integer getMaxSeqMaxValue(List<PsiMethod> list) {
+    private Integer getMaxSeqMaxValue(List<PsiField> list) {
         Integer maxValue = -2147483648;
         Iterator var3 = list.iterator();
 
@@ -136,8 +124,8 @@ public class RmbSeq extends AnAction {
                         return maxValue.equals(-2147483648) ? 0 : maxValue;
                     }
 
-                    PsiMethod m = (PsiMethod) var3.next();
-                    annotation = this.findAnnotationOnMethod(m, "cn.webank.weup.rmb.annotation.RmbField");
+                    PsiField m = (PsiField) var3.next();
+                    annotation = this.findAnnotationOnField(m, "cn.webank.weup.rmb.annotation.RmbField");
                 } while (annotation == null);
 
                 parameterList = annotation.getParameterList();
@@ -170,11 +158,11 @@ public class RmbSeq extends AnAction {
         Integer maxValue = -2147483648;
         PsiClass[] supers = psiClass.getSupers();
         PsiClass[] var4 = supers;
-        int var5 = supers.length;
+        int superLength = supers.length;
 
-        for(int var6 = 0; var6 < var5; ++var6) {
-            PsiClass su = var4[var6];
-            List<PsiMethod> list = (new CollectionListModel(psiClass.getMethods())).getItems();
+        for(int i = 0; i < superLength; ++i) {
+            PsiClass su = var4[i];
+            List<PsiField> list = (new CollectionListModel(psiClass.getFields())).getItems();
             Integer value = this.getMaxRmbFieldMaxValue(list);
             maxValue = Math.max(maxValue, value);
             value = this.checkSuperFieldCount(su);
@@ -202,7 +190,7 @@ public class RmbSeq extends AnAction {
         }
     }
 
-    private Integer getMaxRmbFieldMaxValue(List<PsiMethod> list) {
+    private Integer getMaxRmbFieldMaxValue(List<PsiField> list) {
         Integer maxValue = -2147483648;
         Iterator var3 = list.iterator();
 
@@ -215,8 +203,8 @@ public class RmbSeq extends AnAction {
                         return maxValue.equals(-2147483648) ? 0 : maxValue;
                     }
 
-                    PsiMethod m = (PsiMethod)var3.next();
-                    annotation = this.findAnnotationOnMethod(m, "cn.webank.weup.rmb.annotation.RmbField");
+                    PsiField m = (PsiField)var3.next();
+                    annotation = this.findAnnotationOnField(m, "cn.webank.weup.rmb.annotation.RmbField");
                 } while(annotation == null);
 
                 parameterList = annotation.getParameterList();
@@ -234,8 +222,8 @@ public class RmbSeq extends AnAction {
         }
     }
 
-    private PsiAnnotation findAnnotationOnMethod(PsiMethod psiMethod, String annotationName) {
-        PsiModifierList modifierList = psiMethod.getModifierList();
+    private PsiAnnotation findAnnotationOnField(PsiField psiField, String annotationName) {
+        PsiModifierList modifierList = psiField.getModifierList();
         PsiAnnotation[] var4 = modifierList.getAnnotations();
         int var5 = var4.length;
 
