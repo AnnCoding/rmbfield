@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.your.company.unique.plugin.id</id>
     <name>rmbFieldPlugin</name>
-    <version>1.4</version>
+    <version>1.0</version>
     <vendor email="jienachen@webank.com" url="cjn">cjn</vendor>
 
     <description><![CDATA[
