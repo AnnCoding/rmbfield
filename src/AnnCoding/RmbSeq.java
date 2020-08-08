@@ -23,6 +23,9 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Iterator;
 import java.util.List;
 
+import static AnnCoding.Utils.BuildMessageUtil.buildRmbField;
+import static AnnCoding.Utils.BuildMessageUtil.buildRmbMessage;
+
 /**
  * @author chenjiena
  * @version 1.0
@@ -72,26 +75,6 @@ public class RmbSeq extends AnAction {
         psiClass.getModifierList().addAnnotation(buildRmbMessage());
     }
 
-
-    /**
-     * @return
-     * @RmbSubCommandMessage( subCommand = "",
-     * name = "",
-     * useDesc = "",
-     * threadPoolName = "TP_Main"
-     * )
-     */
-
-    private String buildRmbMessage() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RmbSubCommandMessage(" + "\n");
-        sb.append("    subCommand = \" \"," + "\n");
-        sb.append("     name = \" \"," + "\n");
-        sb.append("     useDesc = \" \"," + "\n");
-        sb.append("     threadPoolName = \"TP_Main\"" + "\n");
-        sb.append(")");
-        return sb.toString();
-    }
 
     private void addRmbField(PsiClass psiClass) {
         List<PsiField> fields = (new CollectionListModel(psiClass.getFields())).getItems();
@@ -144,27 +127,21 @@ public class RmbSeq extends AnAction {
         }
     }
 
-    /**
-     * @return
-     * @RmbField(seq = , title = "", remark = "")
-     */
-    private String buildRmbField(int seq) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("RmbField(seq = " + seq + ", title = \"\", remark = \"\")");
-        return sb.toString();
-    }
+
 
     private Integer checkSuperFieldCount(PsiClass psiClass) {
         Integer maxValue = -2147483648;
         PsiClass[] supers = psiClass.getSupers();
-        PsiClass[] var4 = supers;
+        PsiClass[] supersClone = supers;
         int superLength = supers.length;
 
         for(int i = 0; i < superLength; ++i) {
-            PsiClass su = var4[i];
+            PsiClass su = supersClone[i];
             List<PsiField> list = (new CollectionListModel(psiClass.getFields())).getItems();
+            //当前文件的最大
             Integer value = this.getMaxRmbFieldMaxValue(list);
             maxValue = Math.max(maxValue, value);
+            //子类文件的最大
             value = this.checkSuperFieldCount(su);
             maxValue = Math.max(maxValue, value);
         }
@@ -173,7 +150,9 @@ public class RmbSeq extends AnAction {
     }
 
     private boolean ignoreField(PsiField field) {
-        return field.getModifierList().hasModifierProperty("final") || field.getModifierList().hasModifierProperty("static");
+        return field.getModifierList().hasModifierProperty("final") ||
+                field.getModifierList().hasModifierProperty("static") ||
+                findAnnotationOnField(field, "cn.webank.weup.rmb.annotation.RmbField") != null;
     }
 
 
@@ -192,29 +171,29 @@ public class RmbSeq extends AnAction {
 
     private Integer getMaxRmbFieldMaxValue(List<PsiField> list) {
         Integer maxValue = -2147483648;
-        Iterator var3 = list.iterator();
+        Iterator fieldIterator = list.iterator();
 
         while(true) {
             PsiAnnotationParameterList parameterList;
             do {
                 PsiAnnotation annotation;
                 do {
-                    if (!var3.hasNext()) {
+                    if (!fieldIterator.hasNext()) {
                         return maxValue.equals(-2147483648) ? 0 : maxValue;
                     }
 
-                    PsiField m = (PsiField)var3.next();
+                    PsiField m = (PsiField)fieldIterator.next();
                     annotation = this.findAnnotationOnField(m, "cn.webank.weup.rmb.annotation.RmbField");
                 } while(annotation == null);
 
                 parameterList = annotation.getParameterList();
             } while(parameterList == null);
 
-            PsiNameValuePair[] var7 = parameterList.getAttributes();
-            int var8 = var7.length;
+            PsiNameValuePair[] valuePair = parameterList.getAttributes();
+            int valuePairLen = valuePair.length;
 
-            for(int var9 = 0; var9 < var8; ++var9) {
-                PsiNameValuePair e = var7[var9];
+            for(int i = 0; i < valuePairLen; ++i) {
+                PsiNameValuePair e = valuePair[i];
                 if (e.getValue() != null && ReflectUtil.isNumeric(e.getValue().getText())) {
                     maxValue = Math.max(maxValue, Integer.parseInt(e.getValue().getText()));
                 }
