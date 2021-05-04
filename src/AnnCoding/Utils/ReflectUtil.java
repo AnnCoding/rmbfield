@@ -1,7 +1,11 @@
 package AnnCoding.Utils;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import static AnnCoding.Utils.BuildMessageUtil.changeSnack;
 
 /**
  * @author chenjiena
@@ -31,9 +35,31 @@ public final class ReflectUtil {
     }
 
     public static void main(String[] args) {
-        String rmb = "seq = 2, title = \"ecifNo\", remark = \"ecif号\"";
-        System.out.println(getSeq(rmb));
+        String url = "622262081000939好吧4608";
+        Pattern p = Pattern.compile("[0-9]*");
+        Matcher m = p.matcher(url);
+        System.out.println(m);
+
+        String m1 = "62226 081 30009394608";
+        String m2 = "29993939ab洁娜jjdin";
+        String m3 = "90909090909090";
+
+        //匹配银行的卡号19位数字的正则表达式
+        System.out.println(m1.matches("^\\d{19}$"));
+        System.out.println(m2.matches("^\\d{19}$"));
+        System.out.println(m3.matches("^\\d{19}$"));
+
+        String str = "jienaChenAnnUooK";
+        String ss = str;
+        char[] charArray = str.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            ss = changeSnack(ss);
+            charArray = ss.toCharArray();
+        }
+
+        System.out.println("抽取大写字母："+ ss);
     }
+
 
     public static boolean isNumeric(String str) {
         Matcher isNum = pattern.matcher(str);

@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import java.util.Iterator;
 import java.util.List;
 
+import static AnnCoding.Utils.BuildMessageUtil.buildJsonProperty;
 import static AnnCoding.Utils.BuildMessageUtil.buildRmbField;
 import static AnnCoding.Utils.BuildMessageUtil.buildRmbMessage;
 
@@ -86,10 +87,17 @@ public class RmbSeq extends AnAction {
             //遍历字段
             while (var8.hasNext()) {
                 PsiField field = (PsiField) var8.next();
-                if (!this.ignoreField(field)) {
+                //添加@RmbField注解
+                if (!this.ignoreRmbField(field)) {
                     field.getModifierList().addAnnotation(buildRmbField(count));
                     ++count;
                 }
+                //添加@JsonProperty注解
+                if (!this.ignoreJsonProperty(field)) {
+                    String snackField = field.getName();
+                    field.getModifierList().addAnnotation(buildJsonProperty(snackField));
+                }
+
             }
         }
     }
@@ -149,10 +157,16 @@ public class RmbSeq extends AnAction {
         return maxValue;
     }
 
-    private boolean ignoreField(PsiField field) {
+    private boolean ignoreRmbField(PsiField field) {
         return field.getModifierList().hasModifierProperty("final") ||
                 field.getModifierList().hasModifierProperty("static") ||
                 findAnnotationOnField(field, "cn.webank.weup.rmb.annotation.RmbField") != null;
+    }
+
+    private boolean ignoreJsonProperty(PsiField field) {
+        return field.getModifierList().hasModifierProperty("final") ||
+                field.getModifierList().hasModifierProperty("static") ||
+                findAnnotationOnField(field, "cn.webank.weup.rmb.annotation.JsonProperty") != null;
     }
 
 

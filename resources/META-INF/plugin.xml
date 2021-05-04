@@ -33,7 +33,7 @@
         <!-- Add your actions here -->
         <action id="RmbSeq" class="AnnCoding.RmbSeq" text="RmbSeq" description="RmbSeq">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="shift Q"/>
+<!--            <keyboard-shortcut keymap="$default" first-keystroke="shift Q"/>-->
         </action>
     </actions>
 
